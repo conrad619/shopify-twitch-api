@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@shopify/shopify-api": "^6.2.0",
+    "@shopify/shopify-app-express": "^1.2.2",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "nodemon": "^2.0.22",
+    "nonce": "^1.0.4"
+  },
+  "name": "ShopifyTwitch",
+  "version": "0.0.1",
+  "description": "Shopify and Twitch API for gifting",
+  "main": "index.js",
+  "repository": "https://github.com/conrad619/shopify-twitch-api",
+  "author": "Conrad and Brandon",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  }
+}
