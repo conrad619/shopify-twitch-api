@@ -5,9 +5,8 @@ import { ChatBotConfig } from "./config.model"
 
 export class ConfigValidator {
 
-    public static async readConfig(configPath: string): Promise<ChatBotConfig> {
-        var configJson = JSON.parse(require('fs').readFileSync(configPath))
-
+    public static async readConfig(config: any): Promise<ChatBotConfig> {
+        var configJson = config
         try {
             console.info("Validating Config...")
 

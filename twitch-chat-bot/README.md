@@ -40,4 +40,21 @@ https://id.twitch.tv/oauth2/authorize
     &client_id=9egbqe7dfh8hb291qvxmhykqamhu29
     &redirect_uri=http://localhost
     &scope=channel%3Amanage%3Apolls+channel%3Aread%3Apolls
+
+https://id.twitch.tv/oauth2/authorize
+    ?response_type=code
+    &client_id=9egbqe7dfh8hb291qvxmhykqamhu29
+    &redirect_uri=http://localhost
+    &scope=chat%3Aread%20chat%3Aedit%20moderator%3Amanage%3Aannouncements%20user%3Aread%3Abroadcast%20moderation%3Aread
     
+
+to do
+bot client id
+bot secret api
+get authorization code
+send announcement/
+!enter/
+read random enter
+counter
+anounce winner
+whisper redeem link

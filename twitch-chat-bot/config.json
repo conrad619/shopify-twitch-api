@@ -3,8 +3,8 @@
         "token_endpoint": "https://id.twitch.tv/oauth2/token",
         "username": "witsz",
         "client_id":"9egbqe7dfh8hb291qvxmhykqamhu29",
-        "client_secret":"gktkxowhppp5tm2d7d4mzkf8nu5yya",
-        "authorization_code":"390rdzk058mq2bqh5i8ap2y4od8b6j",
+        "client_secret":"7mozwp9av5zrqe6dmx3emp7xjei3qx",
+        "authorization_code":"2w497z3umpb92bqh3hioybsd63hekj",
         "channel": "witsz"
     }
 }

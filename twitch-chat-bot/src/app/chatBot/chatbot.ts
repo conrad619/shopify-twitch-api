@@ -23,6 +23,12 @@ export class TwitchChatBot {
         );
         this.setupBotBehavior();
         this.twitchClient.connect();
+        
+
+
+        this.getModerators()
+
+
     }
 
     private async fetchAccessToken(): Promise<TwitchTokenDetails> {
@@ -42,6 +48,7 @@ export class TwitchChatBot {
             responseType: 'json'
         }).then(async function (response: any) {
             // handle success
+
             return await TwitchTokenResponseValidator.parseResponse(response.data);
         }).catch(function (error: any) {
             console.log("Failed to get Twitch OAuth Token");
@@ -62,23 +69,135 @@ export class TwitchChatBot {
         })
     }
 
-    refreshTokenIfNeeded() {
+
+    private async refreshToken() {
         //TODO if needed - twitch apparently only requires the token on login so it is good enough for now to just get a token on start-up.
+        const axios = require('axios');
+        console.log("Fetching Twitch OAuth Token");
+        return axios({
+            method: 'post',
+            url: this.config.twitchTokenEndpoint,
+            params: {
+                client_id: this.config.twitchClientId,
+                client_secret: this.config.twitchClientSecret,
+                refresh_token: this.tokenDetails.refresh_token,
+                grant_type: 'refresh_token',
+
+            },
+            responseType: 'json'
+        }).then(async function (response: any) {
+            // handle success
+            await console.log(response.data)
+            return await TwitchTokenResponseValidator.parseResponse(response.data);
+        }).catch(function (error: any) {
+            console.log("Failed to get Twitch OAuth Token");
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.log(error.response.data)
+                throw new TwitchResponseError(error.response.data);
+            } else if (error.request) {
+                // The request was made but no response was received
+                // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+                // http.ClientRequest in node.js
+                throw new NoTwitchResponseError(error.request);
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                throw new MalformedTwitchRequestError(error.request);
+            }
+        })
     }
 
     private setupBotBehavior() {
         this.twitchClient.on('message', (channel: any, tags: any, message: any, self: any) => {
             let helloCommand = "!hello"
+            let enterCommand = "!enter"
 
             //! means a command is coming by, and we check if it matches the command we currently support
             if (message.startsWith('!') && message === helloCommand)
                 this.sayHelloToUser(channel,tags);
+            if (message.startsWith('!') && message === enterCommand)
+                this.SayWinnerToUser(channel,tags);
         });
     }
 
     private sayHelloToUser(channel: any, tags: any) {
             console.log(tags)
             this.twitchClient.say(channel, `Hello, ${ tags.username }! Welcome to the channel.`);
+    }
+
+    private async getModerators(){
+        const axios = require('axios');
+        axios({
+            method:'get',
+            url:'https://api.twitch.tv/helix/moderation/moderators',
+            params: {
+                broadcaster_id: '92422518',
+            },
+            headers: {
+                'Authorization': 'Bearer '+this.tokenDetails.access_token,
+                'Client-Id':this.config.twitchClientId,
+
+            }
+        }).then(async function (response: any) {
+            // handle success
+            await console.log(response.data)
+        }).catch(function (error: any) {
+            console.log("Failed to to moderate");
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.log(error.response.data)
+                throw new TwitchResponseError(error.response.data);
+            }
+        })
+
+        
+        // this.tokenDetails = await this.refreshToken()
+    }
+
+    private async SendAnnouncement(tags:any){
+        const axios = require('axios');
+        // https://api.twitch.tv/helix/chat/announcements
+        // this.tokenDetails = await this.fetchAccessToken();
+        
+        
+        axios({
+            method: 'post',
+            url: 'https://api.twitch.tv/helix/chat/announcements',
+            params: {
+                broadcaster_id: '92422518',
+                moderator_id: '92422518',
+            },
+            headers: {
+                'Authorization': 'Bearer '+this.tokenDetails.access_token,
+                'Client-Id':this.config.twitchClientId,
+                'Content-Type': 'application/json'
+            },
+            data:{
+                message:`GIVEAWAY WINNER ANNOUNCEMENT, ${tags.username}! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`,
+                color:"green"
+            },
+            responseType: 'json'
+        }).then(async function (response: any) {
+            // handle success
+            await console.log(response.data)
+        }).catch(async function (error: any) {
+            console.log("Failed to announce");
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.log(error.response.data)
+                throw new TwitchResponseError(error.response.data);
+            }
+        })
+    }
+    
+    private async SayWinnerToUser(channel: any, tags: any) {
+        console.log(tags)
+        // this.twitchClient.say(channel, `/announce GIVEAWAY WINNER ANNOUNCEMENT, ${ tags.username }! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`);
+        this.SendAnnouncement(tags)
+
     }
 
     private buildConnectionConfig(channel: string, username: string, accessToken: string) {
