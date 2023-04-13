@@ -30,14 +30,22 @@ const app = express();
 const port = 3000;
 
 app.get('/', (req: Request, res: Response) => {
-  res.send(`<a href='https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=9egbqe7dfh8hb291qvxmhykqamhu29&redirect_uri=http://localhost:3000/token&scope=chat%3Aread%20chat%3Aedit%20moderator%3Amanage%3Aannouncements%20user%3Aread%3Abroadcast%20moderation%3Aread'>generate code</a>`);
+    res.send(`<a href='https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=9egbqe7dfh8hb291qvxmhykqamhu29&redirect_uri=http://localhost:3000/token&scope=chat%3Aread%20chat%3Aedit%20moderator%3Amanage%3Aannouncements%20user%3Aread%3Abroadcast%20moderation%3Aread'>generate code</a>`);
 });
 
 //get token generated
 app.get('/token', (req: Request, res: Response) => {
     const code = req.query.code as string;
     tokens.twitch.authorization_code = code
-    res.send(`code:${code} <a href='/bot?action=join'>join<a/>`);
+    res.send(`
+        generated code: ${code}
+        <form method="get" action="/bot">
+            <label for="channel">Enter Channel Name for bot to Join:</label>
+            <input type="text" id="channel" name="channel">
+            <input type="submit" value="join"/>
+        </form>
+    `)
+    // res.send(`code:${code} <a href='/bot?action=join'>join<a/>`);
 });
 
 // get action and channel name to join
@@ -46,11 +54,9 @@ app.get('/bot', (req: Request, res: Response) => {
     const channel = req.query.channel as string;
     if(isNotEmpty(channel))
         tokens.twitch.channel = channel;
-    if(action === "join"){
-        ConfigValidator.readConfig(tokens)
-        .then((config: ChatBotConfig) =>  new TwitchChatBot(config).launch());
-    }
-
+    ConfigValidator.readConfig(tokens)
+    .then((config: ChatBotConfig) =>  new TwitchChatBot(config).launch());
+    
     res.redirect('/success')
 })
 
