@@ -15,6 +15,9 @@ export class TwitchChatBot {
 
     async launch() {
         this.tokenDetails = await this.fetchAccessToken();
+        
+        this.config.broadcaster_id = await this.GetBroadcasterID();
+        
         this.twitchClient = new this.tmi.Client(
             this.buildConnectionConfig(
                 this.config.twitchChannel,
@@ -29,7 +32,6 @@ export class TwitchChatBot {
         // this.getModerators()
 
         //setbroadcaster_id for announcement
-        this.config.broadcaster_id = await this.GetBroadcasterID();
 
     }
 
