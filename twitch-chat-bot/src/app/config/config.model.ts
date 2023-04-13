@@ -26,6 +26,10 @@ export class ChatBotConfig {
     @IsNotEmpty()
     @IsString()
     public twitchChannel: string;
+    
+    @IsNotEmpty()
+    @IsString()
+    public broadcaster_id: string;
 
 
     constructor(
@@ -34,7 +38,8 @@ export class ChatBotConfig {
         twitchClientId: string,
         twitchClientSecret: string,
         twitchAuthorizationCode: string,
-        twitchChannel: string
+        twitchChannel: string,
+        broadcaster_id: string
     ) {
         this.twitchTokenEndpoint = twitchTokenEndpoint;
         this.twitchUser = twitchUsername;
@@ -42,5 +47,6 @@ export class ChatBotConfig {
         this.twitchChannel = twitchChannel;
         this.twitchClientId = twitchClientId;
         this.twitchAuthorizationCode = twitchAuthorizationCode;
+        this.broadcaster_id = broadcaster_id;
     }
 }

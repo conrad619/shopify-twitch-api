@@ -2,7 +2,7 @@ import { ChatBotConfig } from './../config/config.model';
 import { TwitchTokenDetails } from './../models/twitchTokenDetails.models';
 import { TwitchTokenResponseValidator } from './../utils/TwitchTokenResponseValidator';
 import { MalformedTwitchRequestError, NoTwitchResponseError, TwitchResponseError } from '../models/error.model';
-
+const axios = require('axios');
 
 export class TwitchChatBot {
 
@@ -26,13 +26,14 @@ export class TwitchChatBot {
         
 
 
-        this.getModerators()
+        // this.getModerators()
 
+        //setbroadcaster_id for announcement
+        this.config.broadcaster_id = await this.GetBroadcasterID();
 
     }
 
     private async fetchAccessToken(): Promise<TwitchTokenDetails> {
-        const axios = require('axios');
         console.log("Fetching Twitch OAuth Token");
         return axios({
             method: 'post',
@@ -70,44 +71,6 @@ export class TwitchChatBot {
     }
 
 
-    private async refreshToken() {
-        //TODO if needed - twitch apparently only requires the token on login so it is good enough for now to just get a token on start-up.
-        const axios = require('axios');
-        console.log("Fetching Twitch OAuth Token");
-        return axios({
-            method: 'post',
-            url: this.config.twitchTokenEndpoint,
-            params: {
-                client_id: this.config.twitchClientId,
-                client_secret: this.config.twitchClientSecret,
-                refresh_token: this.tokenDetails.refresh_token,
-                grant_type: 'refresh_token',
-
-            },
-            responseType: 'json'
-        }).then(async function (response: any) {
-            // handle success
-            await console.log(response.data)
-            return await TwitchTokenResponseValidator.parseResponse(response.data);
-        }).catch(function (error: any) {
-            console.log("Failed to get Twitch OAuth Token");
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                console.log(error.response.data)
-                throw new TwitchResponseError(error.response.data);
-            } else if (error.request) {
-                // The request was made but no response was received
-                // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-                // http.ClientRequest in node.js
-                throw new NoTwitchResponseError(error.request);
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                throw new MalformedTwitchRequestError(error.request);
-            }
-        })
-    }
-
     private setupBotBehavior() {
         this.twitchClient.on('message', (channel: any, tags: any, message: any, self: any) => {
             let helloCommand = "!hello"
@@ -122,12 +85,11 @@ export class TwitchChatBot {
     }
 
     private sayHelloToUser(channel: any, tags: any) {
-            console.log(tags)
+            // console.log(tags)
             this.twitchClient.say(channel, `Hello, ${ tags.username }! Welcome to the channel.`);
     }
 
     private async getModerators(){
-        const axios = require('axios');
         axios({
             method:'get',
             url:'https://api.twitch.tv/helix/moderation/moderators',
@@ -192,11 +154,44 @@ export class TwitchChatBot {
             }
         })
     }
+
+    private async GetBroadcasterID(){
+        
+        
+        axios({
+            method: 'get',
+            url: `https://api.twitch.tv/helix/users`,
+            params: {
+                login: this.config.twitchChannel
+            },
+            headers: {
+                'Authorization': 'Bearer '+this.tokenDetails.access_token,
+                'Client-Id':this.config.twitchClientId,
+                'Content-Type': 'application/json'
+            }
+        }).then(async function (response: any) {
+            // handle success
+            return await response.data[0].id as string;
+        }).catch(async function (error: any) {
+            console.log("Failed to announce");
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.log(error.response.data)
+                throw new TwitchResponseError(error.response.data);
+            }
+        })
+
+        return "failed"
+    }
+
+    
     
     private async SayWinnerToUser(channel: any, tags: any) {
         console.log(tags)
         // this.twitchClient.say(channel, `/announce GIVEAWAY WINNER ANNOUNCEMENT, ${ tags.username }! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`);
         this.SendAnnouncement(tags)
+        // this.GetBroadcasterID()
 
     }
 

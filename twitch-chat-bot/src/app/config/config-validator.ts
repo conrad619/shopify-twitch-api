@@ -16,7 +16,8 @@ export class ConfigValidator {
                 configJson.twitch.client_id,
                 configJson.twitch.client_secret,
                 configJson.twitch.authorization_code,
-                configJson.twitch.channel
+                configJson.twitch.channel,
+                configJson.twitch.broadcaster_id
             )
             let completeConfigErrors = await validate(completeConfig);
 

@@ -44,7 +44,7 @@ https://id.twitch.tv/oauth2/authorize
 https://id.twitch.tv/oauth2/authorize
     ?response_type=code
     &client_id=9egbqe7dfh8hb291qvxmhykqamhu29
-    &redirect_uri=http://localhost
+    &redirect_uri=http://localhost:3000
     &scope=chat%3Aread%20chat%3Aedit%20moderator%3Amanage%3Aannouncements%20user%3Aread%3Abroadcast%20moderation%3Aread
     
 
