@@ -2,6 +2,7 @@ import { ChatBotConfig } from './../config/config.model';
 import { TwitchTokenDetails } from './../models/twitchTokenDetails.models';
 import { TwitchTokenResponseValidator } from './../utils/TwitchTokenResponseValidator';
 import { MalformedTwitchRequestError, NoTwitchResponseError, TwitchResponseError } from '../models/error.model';
+import { isNotEmpty } from 'class-validator';
 const axios = require('axios');
 
 export class TwitchChatBot {
@@ -120,10 +121,8 @@ export class TwitchChatBot {
         // this.tokenDetails = await this.refreshToken()
     }
 
-    private async SendAnnouncement(tags:any){
+    public async SendAnnouncementWinner(tags:any){
         const axios = require('axios');
-        // https://api.twitch.tv/helix/chat/announcements
-        // this.tokenDetails = await this.fetchAccessToken();
         
         
         axios({
@@ -140,6 +139,41 @@ export class TwitchChatBot {
             },
             data:{
                 message:`GIVEAWAY WINNER ANNOUNCEMENT, ${tags.username}! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`,
+                color:"green"
+            },
+            responseType: 'json'
+        }).then(async function (response: any) {
+            // handle success
+            await console.log(response.data)
+        }).catch(async function (error: any) {
+            console.log("Failed to announce");
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.log(error.response.data)
+                throw new TwitchResponseError(error.response.data);
+            }
+        })
+    }
+
+    public async SendAnnouncement(message:string){
+        const axios = require('axios');
+        
+        
+        axios({
+            method: 'post',
+            url: 'https://api.twitch.tv/helix/chat/announcements',
+            params: {
+                broadcaster_id: '92422518',
+                moderator_id: '92422518',
+            },
+            headers: {
+                'Authorization': 'Bearer '+this.tokenDetails.access_token,
+                'Client-Id':this.config.twitchClientId,
+                'Content-Type': 'application/json'
+            },
+            data:{
+                message:message,
                 color:"green"
             },
             responseType: 'json'
@@ -192,7 +226,7 @@ export class TwitchChatBot {
     private async SayWinnerToUser(channel: any, tags: any) {
         console.log(tags)
         // this.twitchClient.say(channel, `/announce GIVEAWAY WINNER ANNOUNCEMENT, ${ tags.username }! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`);
-        this.SendAnnouncement(tags)
+        this.SendAnnouncementWinner(tags)
         // this.GetBroadcasterID()
 
     }
