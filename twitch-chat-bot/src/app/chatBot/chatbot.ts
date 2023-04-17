@@ -11,6 +11,12 @@ export class TwitchChatBot {
 
     public twitchClient: any;
     private tokenDetails!: TwitchTokenDetails;
+    public list_of_users_who_enter:any[] = []
+    public setTimerWinner:any
+    public timeActive:boolean = false
+    public winner:any
+    public sendingGift:boolean = true
+    public timerCountToWinner:number = 5000
 
     constructor(private config: ChatBotConfig) { }
 
@@ -73,7 +79,6 @@ export class TwitchChatBot {
         })
     }
 
-
     private setupBotBehavior() {
         this.twitchClient.on('message', (channel: any, tags: any, message: any, self: any) => {
             let helloCommand = "!hello"
@@ -82,8 +87,22 @@ export class TwitchChatBot {
             //! means a command is coming by, and we check if it matches the command we currently support
             if (message.startsWith('!') && message === helloCommand)
                 this.sayHelloToUser(channel,tags);
-            if (message.startsWith('!') && message === enterCommand)
-                this.SayWinnerToUser(channel,tags);
+            if (message.startsWith('!') && message === enterCommand){
+                this.list_of_users_who_enter.push(tags)
+                if(!this.timeActive && this.sendingGift){
+
+                    this.timeActive = true
+                    this.setTimerWinner = setTimeout(()=>{
+                        const random = Math.floor(Math.random()*this.list_of_users_who_enter.length-1)
+                        this.winner = this.list_of_users_who_enter[random]
+                        this.SendAnnouncementWinner(this.winner)
+                        this.timeActive=false
+                        //this.sendingGift=false
+                    },this.timerCountToWinner)
+
+
+                }
+            }
         });
     }
 
@@ -225,8 +244,8 @@ export class TwitchChatBot {
     
     private async SayWinnerToUser(channel: any, tags: any) {
         console.log(tags)
+        this.list_of_users_who_enter.push(tags)
         // this.twitchClient.say(channel, `/announce GIVEAWAY WINNER ANNOUNCEMENT, ${ tags.username }! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`);
-        this.SendAnnouncementWinner(tags)
         // this.GetBroadcasterID()
 
     }
