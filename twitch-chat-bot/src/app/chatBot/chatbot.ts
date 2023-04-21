@@ -87,17 +87,17 @@ export class TwitchChatBot {
             //! means a command is coming by, and we check if it matches the command we currently support
             if (message.startsWith('!') && message === helloCommand)
                 this.sayHelloToUser(channel,tags);
-            if (message.startsWith('!') && message === enterCommand){
+            if (message.startsWith('!') && message === enterCommand && this.sendingGift){
                 this.list_of_users_who_enter.push(tags)
-                if(!this.timeActive && this.sendingGift){
+                if(!this.timeActive){
 
                     this.timeActive = true
                     this.setTimerWinner = setTimeout(()=>{
-                        const random = Math.floor(Math.random()*this.list_of_users_who_enter.length-1)
+                        const random = Math.floor(Math.random()*this.list_of_users_who_enter.length)
                         this.winner = this.list_of_users_who_enter[random]
                         this.SendAnnouncementWinner(this.winner)
                         this.timeActive=false
-                        //this.sendingGift=false
+                        this.sendingGift=false
                     },this.timerCountToWinner)
 
 
@@ -141,7 +141,6 @@ export class TwitchChatBot {
     }
 
     public async SendAnnouncementWinner(tags:any){
-        const axios = require('axios');
         
         
         axios({
@@ -175,8 +174,7 @@ export class TwitchChatBot {
         })
     }
 
-    public async SendAnnouncement(message:string){
-        const axios = require('axios');
+    public async SendAnnouncementGiveAway(message:string){
         
         
         axios({
@@ -208,6 +206,8 @@ export class TwitchChatBot {
                 throw new TwitchResponseError(error.response.data);
             }
         })
+
+        this.sendingGift=true
     }
 
     private async GetBroadcasterID(){
@@ -228,7 +228,7 @@ export class TwitchChatBot {
             // handle success
             return await response.data[0].id as string;
         }).catch(async function (error: any) {
-            console.log("Failed to announce");
+            console.log("Failed to broadcaster");
             if (error.response) {
                 // The request was made and the server responded with a status code
                 // that falls out of the range of 2xx
@@ -263,6 +263,10 @@ export class TwitchChatBot {
             },
             channels: [`${channel}`]
         };
+    }
+
+    public getConfig():ChatBotConfig{
+        return this.config
     }
 }
 
