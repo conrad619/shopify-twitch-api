@@ -111,34 +111,34 @@ export class TwitchChatBot {
             this.twitchClient.say(channel, `Hello, ${ tags.username }! Welcome to the channel.`);
     }
 
-    private async getModerators(){
-        axios({
-            method:'get',
-            url:'https://api.twitch.tv/helix/moderation/moderators',
-            params: {
-                broadcaster_id: '92422518',
-            },
-            headers: {
-                'Authorization': 'Bearer '+this.tokenDetails.access_token,
-                'Client-Id':this.config.twitchClientId,
+    // private async getModerators(){
+    //     axios({
+    //         method:'get',
+    //         url:'https://api.twitch.tv/helix/moderation/moderators',
+    //         params: {
+    //             broadcaster_id: '92422518',
+    //         },
+    //         headers: {
+    //             'Authorization': 'Bearer '+this.tokenDetails.access_token,
+    //             'Client-Id':this.config.twitchClientId,
 
-            }
-        }).then(async function (response: any) {
-            // handle success
-            await console.log(response.data)
-        }).catch(function (error: any) {
-            console.log("Failed to to moderate");
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-                console.log(error.response.data)
-                throw new TwitchResponseError(error.response.data);
-            }
-        })
+    //         }
+    //     }).then(async function (response: any) {
+    //         // handle success
+    //         await console.log(response.data)
+    //     }).catch(function (error: any) {
+    //         console.log("Failed to to moderate");
+    //         if (error.response) {
+    //             // The request was made and the server responded with a status code
+    //             // that falls out of the range of 2xx
+    //             console.log(error.response.data)
+    //             throw new TwitchResponseError(error.response.data);
+    //         }
+    //     })
 
         
-        // this.tokenDetails = await this.refreshToken()
-    }
+    //     // this.tokenDetails = await this.refreshToken()
+    // }
 
     public async SendAnnouncementWinner(tags:any){
         
@@ -156,7 +156,7 @@ export class TwitchChatBot {
                 'Content-Type': 'application/json'
             },
             data:{
-                message:`GIVEAWAY WINNER ANNOUNCEMENT, ${tags.username}! won a gift merch. https://geeksunleashed-new.myshopify.com/redeem to redeem.`,
+                message:`GIVEAWAY WINNER ANNOUNCEMENT, ${tags.username}! won a gift merch. https://geeksunleashed-new.myshopify.com/claim to redeem.`,
                 color:"green"
             },
             responseType: 'json'
