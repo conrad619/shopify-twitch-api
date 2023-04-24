@@ -104,6 +104,7 @@ app.get('/api/join', async (req: Request, res: Response) => {
 app.get('/api/connect', async (req: Request, res: Response) => {
     
     const axios = require('axios');
+
     const code = req.query.code as string;
     const channel = req.query.state as string;
     
@@ -135,7 +136,8 @@ app.get('/api/connect', async (req: Request, res: Response) => {
         chatbot = new TwitchChatBot(config)
         chatbots.push(chatbot)
         await chatbot.launch()
-        res.send("success")
+        
+        res.render(path.join('successfully-connected.html'));
         // res.redirect(`${chatbot.getConfig().store}/authcode?code=${chatbot.getConfig().twitchAuthorizationCode}`)
     });
     
