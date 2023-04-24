@@ -45,24 +45,24 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 
-// app.get('/', (req: Request, res: Response) => {
-//     const invalid = req.query.invalid as string;
-//     const warning = "Username or Channel Invalid"
-//     let display = "none"
-//     if(isNotEmpty(invalid)){
-//         display="block";
-//     }
-//     res.send(`
-//     <div style='display:${display}'>${warning}</div>
-//     <form method="get" action="/api/setup">
-//             <label for="username">Enter Username:</label>
-//             <input type="text" id="username" name="username" value="witsz">
-//             <label for="channel">Enter Channel Name:</label>
-//             <input type="text" id="channel" name="channel" value="witsz">
-//             <input type="text" id="store" name="store" value="witsz">
-//             <input type="submit" value="join"/>
-//         </form>`);
-// });
+app.get('/', (req: Request, res: Response) => {
+    const invalid = req.query.invalid as string;
+    const warning = "Username or Channel Invalid"
+    let display = "none"
+    if(isNotEmpty(invalid)){
+        display="block";
+    }
+    res.send(`
+    <div style='display:${display}'>${warning}</div>
+    <form method="get" action="/api/setup">
+            <label for="username">Enter Username:</label>
+            <input type="text" id="username" name="username" value="witsz">
+            <label for="channel">Enter Channel Name:</label>
+            <input type="text" id="channel" name="channel" value="witsz">
+            <input type="text" id="store" name="store" value="https://gamers-pixel.myshopify.com/">
+            <input type="submit" value="join"/>
+        </form>`);
+});
 
 
 app.get('/api/setup', (req: Request, res: Response) => {
@@ -113,14 +113,6 @@ app.get('/api/connect', async (req: Request, res: Response) => {
     console.log("this is the code: "+code)
     console.log("check state: "+queue[channel])
     
-    ConfigValidator.readConfig(queue[channel])
-    .then( async(config: ChatBotConfig) =>  {
-        chatbot = new TwitchChatBot(config)
-        chatbots.push(chatbot)
-        await chatbot.launch()
-        res.send("success")
-        // res.redirect(`${chatbot.getConfig().store}/authcode?code=${chatbot.getConfig().twitchAuthorizationCode}`)
-    });
 
     await axios({
         method: 'post',
@@ -137,6 +129,15 @@ app.get('/api/connect', async (req: Request, res: Response) => {
         console.log("failed token")
         console.log(error.response.data)
     })
+
+    ConfigValidator.readConfig(queue[channel])
+    .then( async(config: ChatBotConfig) =>  {
+        chatbot = new TwitchChatBot(config)
+        chatbots.push(chatbot)
+        await chatbot.launch()
+        res.send("success")
+        // res.redirect(`${chatbot.getConfig().store}/authcode?code=${chatbot.getConfig().twitchAuthorizationCode}`)
+    });
     
 })
 
