@@ -54,7 +54,7 @@ app.get('/', (req: Request, res: Response) => {
     }
     res.send(`
     <div style='display:${display}'>${warning}</div>
-    <form method="get" action="/api/setup">
+    <form method="post" action="/api/setup">
             <label for="username">Enter Username:</label>
             <input type="text" id="username" name="username" value="witsz">
             <label for="channel">Enter Channel Name:</label>
