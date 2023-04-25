@@ -81,6 +81,7 @@ app.post('/api/setup', (req: Request, res: Response) => {
             console.log('in array')
             queue[channel] = tokens
         }
+        console.log(queue[channel].twitch.access_token)
         res.status(200).send("success")
     }else{
         res.status(400).send("error")
