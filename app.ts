@@ -65,10 +65,10 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 
-app.get('/api/setup', (req: Request, res: Response) => {
-    const channel = req.query.channel as string;
-    const username = req.query.username as string;
-    const store = req.query.store as string;
+app.post('/api/setup', (req: Request, res: Response) => {
+    const channel = req.body.channel as string;
+    const username = req.body.username as string;
+    const store = req.body.store as string;
     if(isNotEmpty(channel) && isNotEmpty(username)){
         tokens.twitch.channel = channel;
         tokens.twitch.username = username;
@@ -81,9 +81,9 @@ app.get('/api/setup', (req: Request, res: Response) => {
             console.log('in array')
             queue[channel] = tokens
         }
-        res.redirect(`https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${tokens.twitch.client_id}&redirect_uri=http://localhost:3000/api/join&scope=chat%3Aread%20chat%3Aedit%20moderator%3Amanage%3Aannouncements%20user%3Aread%3Abroadcast%20moderation%3Aread&state=${tokens.twitch.channel}`)
+        res.status(200).send("success")
     }else{
-        res.redirect('/?invalid=true')
+        res.status(400).send("error")
     }
 })
 
