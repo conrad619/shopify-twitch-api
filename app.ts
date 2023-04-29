@@ -18,7 +18,8 @@ const tokens = {
         "authorization_code":process.env.AUTHORIZATION_CODE,
         "channel":process.env.CHANNEL,
         "broadcaster_id":'1234',
-        "store":'https://gamers-pixel.myshopify.com/'
+        "store":'https://gamers-pixel.myshopify.com/',
+        "chatbot":null
     }
 }
 
@@ -45,24 +46,24 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 
 
-app.get('/', (req: Request, res: Response) => {
-    const invalid = req.query.invalid as string;
-    const warning = "Username or Channel Invalid"
-    let display = "none"
-    if(isNotEmpty(invalid)){
-        display="block";
-    }
-    res.send(`
-    <div style='display:${display}'>${warning}</div>
-    <form method="post" action="/api/setup">
-            <label for="username">Enter Username:</label>
-            <input type="text" id="username" name="username" value="witsz">
-            <label for="channel">Enter Channel Name:</label>
-            <input type="text" id="channel" name="channel" value="witsz">
-            <input type="text" id="store" name="store" value="https://gamers-pixel.myshopify.com/">
-            <input type="submit" value="join"/>
-        </form>`);
-});
+// app.get('/', (req: Request, res: Response) => {
+//     const invalid = req.query.invalid as string;
+//     const warning = "Username or Channel Invalid"
+//     let display = "none"
+//     if(isNotEmpty(invalid)){
+//         display="block";
+//     }
+//     res.send(`
+//     <div style='display:${display}'>${warning}</div>
+//     <form method="post" action="/api/setup">
+//             <label for="username">Enter Username:</label>
+//             <input type="text" id="username" name="username" value="witsz">
+//             <label for="channel">Enter Channel Name:</label>
+//             <input type="text" id="channel" name="channel" value="witsz">
+//             <input type="text" id="store" name="store" value="https://gamers-pixel.myshopify.com/">
+//             <input type="submit" value="join"/>
+//         </form>`);
+// });
 
 
 app.post('/api/setup', (req: Request, res: Response) => {
@@ -81,7 +82,7 @@ app.post('/api/setup', (req: Request, res: Response) => {
             console.log('in array')
             queue[channel] = tokens
         }
-        console.log(queue[channel].twitch.access_token)
+        // console.log(queue[channel].twitch.access_token)
         res.status(200).send("success")
     }else{
         res.status(400).send("error")
@@ -94,8 +95,8 @@ app.get('/api/join', async (req: Request, res: Response) => {
     const code = req.query.code as string;
     const state = req.query.state as string;
 
-    console.log("this is the code: "+code)
-    console.log("check state: "+queue[state])
+    console.log("this is the code join: "+code)
+    // console.log("check state: "+queue[state])
 
     res.render(path.join('join.html'),{channel:state,code:code});
     
@@ -112,8 +113,8 @@ app.get('/api/connect', async (req: Request, res: Response) => {
     tokens.twitch.authorization_code = code
     queue[channel] = tokens
 
-    console.log("this is the code: "+code)
-    console.log("check state: "+queue[channel])
+    console.log("this is the code connect: "+code)
+    // console.log("check state: "+queue[channel])
     
 
     await axios({
@@ -125,24 +126,30 @@ app.get('/api/connect', async (req: Request, res: Response) => {
         }
     }).then(async function (response: any) {
         // handle success
-        console.log("got token")
-        await console.log(response.data)
+        console.log("got token connect")
+        // console.log(response.status)
+        // res.render(response.data);
+
     }).catch(function (error: any) {
         console.log("failed token")
-        console.log(error.response.data)
+        // console.log(error)
     })
 
     ConfigValidator.readConfig(queue[channel])
     .then( async(config: ChatBotConfig) =>  {
         chatbot = new TwitchChatBot(config)
-        chatbots.push(chatbot)
         await chatbot.launch()
-        
+        // chatbots.push(chatbot)
+        queue[channel].twitch.chatbot = chatbot
+        console.log("chatbot")
+        // console.log(queue[channel].twitch.chatbot)
+
         res.render(path.join('successfully-connected.html'));
         // res.redirect(`${chatbot.getConfig().store}/authcode?code=${chatbot.getConfig().twitchAuthorizationCode}`)
     });
     
 })
+
 
 app.get('/form', (req: Request, res: Response) => {
     const code = req.query.code //code for shopify authentication
@@ -161,17 +168,18 @@ app.post('/api/giveaway-announcement', async(req: Request, res:Response) => {
     const message = req.body.message as string
     const channel = req.body.channel as string
     const code = req.body.code as string
-    chatbots.forEach(async c=>{ 
+    console.log("announcement")
+    //search for bot that has channel
+    if(code == queue[channel].twitch.authorization_code)
+    {
+        await queue[channel].twitch.chatbot.SendAnnouncementGiveAway(message)
+        res.status(200).send('success')
 
-        //search for bot that has channel
-        if(channel == c.getConfig().twitchChannel && code == c.getConfig().twitchAuthorizationCode)
-        {
-            await c.SendAnnouncementGiveAway(message)
-        }
+    }else{
+        res.status(400).send('message, channel and code required')
+    }
 
-    })
 
-    res.status(200).send('success')
 })
 
 
@@ -222,7 +230,6 @@ app.get('/api/verify',async (req:Request, res:Response) => {
     }).then(async function (response: any) {
         // handle success
         console.log("got token")
-        await console.log(response.data)
         access_token = response.data.access_token
     }).catch(function (error: any) {
         console.log("failed token")

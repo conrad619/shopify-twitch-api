@@ -156,13 +156,14 @@ export class TwitchChatBot {
                 'Content-Type': 'application/json'
             },
             data:{
-                message:`GIVEAWAY WINNER ANNOUNCEMENT, ${tags.username}! won a gift merch. https://geeksunleashed-new.myshopify.com/claim to redeem.`,
+                message:`GIVEAWAY WINNER ANNOUNCEMENT, ${tags.username}! won a gift merch.`,
                 color:"green"
             },
             responseType: 'json'
         }).then(async function (response: any) {
             // handle success
-            await console.log(response.data)
+            await response.data
+            
         }).catch(async function (error: any) {
             console.log("Failed to announce");
             if (error.response) {
@@ -196,7 +197,7 @@ export class TwitchChatBot {
             responseType: 'json'
         }).then(async function (response: any) {
             // handle success
-            await console.log(response.data)
+            await response.data
         }).catch(async function (error: any) {
             console.log("Failed to announce");
             if (error.response) {
